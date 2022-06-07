@@ -14,7 +14,7 @@ use webvimark\modules\UserManagement\models\User;
 class SiteController extends Controller
 {
 
-    public $freeAccessActions = ['index'];
+    //public $freeAccessActions = ['index'];
 
     public function behaviors()
     {
@@ -62,7 +62,8 @@ class SiteController extends Controller
     {
 
         if (User::hasRole('owner', false)) {
-            return $this->render('owner/index');
+            $in_restaurant = true;
+            return $this->render('owner/index', compact('in_restaurant'));
         }
         return $this->render('index');
     }

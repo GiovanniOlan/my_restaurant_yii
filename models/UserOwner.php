@@ -61,7 +61,7 @@ class UserOwner extends \yii\db\ActiveRecord
      */
     public function getRestaurants()
     {
-        return $this->hasMany(Restaurant::className(), ['res_fkuserowner' => 'id']);
+        return $this->hasMany(Restaurant::className(), ['res_fkuserowner' => 'id'])->where(['state' => 1]);
     }
 
     /**

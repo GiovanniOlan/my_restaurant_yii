@@ -1,10 +1,12 @@
 <?php
 
 use Yii;
-use yii\bootstrap4\Nav;
-use yii\bootstrap4\Html;
-use yii\bootstrap4\NavBar;
-use webvimark\modules\UserManagement\UserManagementModule;
+use app\models\UserCustom;
+
+if (!Yii::$app->user->isSuperAdmin) {
+
+    $usercustom_logged = UserCustom::getUserCustom(Yii::$app->user->id);
+}
 
 ?>
 
@@ -27,7 +29,7 @@ use webvimark\modules\UserManagement\UserManagementModule;
         </button>
         <div class="collapse navbar-collapse" id="navigation">
             <ul class="navbar-nav ml-auto">
-                <li class="search-bar input-group">
+                <!-- <li class="search-bar input-group">
                     <button class="btn btn-link" id="search-button" data-toggle="modal" data-target="#searchModal"><i class="tim-icons icon-zoom-split"></i>
                         <span class="d-lg-none d-md-block">Search</span>
                     </button>
@@ -52,11 +54,11 @@ use webvimark\modules\UserManagement\UserManagementModule;
                         <li class="nav-link"><a href="javascript:void(0)" class="nav-item dropdown-item">Another one</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                 <li class="dropdown nav-item">
-                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
                         <div class="photo">
-                            <img src="" alt="Profile Photo">
+                            <img src="<?= $usercustom_logged->getPhotoUrl(); ?>" alt="Profile Photo">
                         </div>
                         <b class="caret d-none d-lg-block d-xl-block"></b>
                         <p class="d-lg-none">

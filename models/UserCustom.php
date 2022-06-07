@@ -117,4 +117,9 @@ class UserCustom extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'usu_fkuser']);
     }
+
+    public function getPhotoUrl()
+    {
+        return (empty($this->usu_photo) ? "/upload/images/default/user-default.png" : $this->usu_photo);
+    }
 }

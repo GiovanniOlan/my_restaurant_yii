@@ -2,11 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Restaurant;
-use app\models\RestaurantSearch;
+use Yii;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\UserOwner;
+use app\models\Utilities;
+use yii\web\UploadedFile;
+use app\models\Restaurant;
 use yii\filters\VerbFilter;
+use app\models\RestaurantSearch;
+use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * RestaurantController implements the CRUD actions for Restaurant model.
@@ -34,11 +39,6 @@ class RestaurantController extends Controller
         );
     }
 
-    /**
-     * Lists all Restaurant models.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         $searchModel = new RestaurantSearch();
@@ -50,82 +50,115 @@ class RestaurantController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Restaurant model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        $restaurant = $this->findModel($id);
+        if (Yii::$app->user->isSuperAdmin) {
+            return $this->render('view', compact('restaurant'));
+        }
+        if (User::hasRole('owner')) {
+            return $this->render('owner-view', compact('restaurant'));
+        }
     }
 
-    /**
-     * Creates a new Restaurant model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
     public function actionCreate()
     {
-        $model = new Restaurant();
+        $restaurant = new Restaurant();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($restaurant->load($this->request->post())) {
+                $restaurant->state = 1;
+                $restaurant->res_fkuserowner = UserOwner::getUserOwnerLogged()->id;
+                $img_mainimage = UploadedFile::getInstance($restaurant, 'img_mainimage');
+                if (!empty($img_mainimage)) {
+                    $response = Utilities::uploadImage('/upload/images/restaurant/', $img_mainimage);
+                    if (!empty($response)) {
+                        $restaurant->res_mainimage = $response;
+                    } else {
+                        Yii::$app->getSession()->setFlash('Se ha creado el restaurante, pero no se subio la imagen Principal, intente más tarde.');
+                    }
+                }
+                $img_logo = UploadedFile::getInstance($restaurant, 'img_logo');
+                if (!empty($img_logo)) {
+                    $response_second = Utilities::uploadImage('/upload/images/restaurant/', $img_logo);
+                    if (!empty($response_second)) {
+                        $restaurant->res_logo = $response_second;
+                    } else {
+                        Yii::$app->getSession()->setFlash('Se ha creado el restaurante, pero no se subio el logo, intente más tarde.');
+                    }
+                }
+                if ($restaurant->save()) {
+                    return $this->redirect(['view', 'id' => $restaurant->id]);
+                } else {
+                    Yii::$app->getSession()->setFlash('No se pudo crear el resturante, intente más tarde.');
+                }
             }
         } else {
-            $model->loadDefaultValues();
+            $restaurant->loadDefaultValues();
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        if (User::hasRole('owner')) {
+            return $this->render('owner-create', compact('restaurant'));
+        } else {
+            return $this->render('create', 'restaurant');
+        }
     }
 
-    /**
-     * Updates an existing Restaurant model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $restaurant = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost && $restaurant->load($this->request->post())) {
+            $img_mainimage = UploadedFile::getInstance($restaurant, 'img_mainimage');
+            if (!empty($img_mainimage)) {
+                $response = Utilities::uploadImage('/upload/images/restaurant/', $img_mainimage);
+                if (!empty($response)) {
+                    if (!empty($restaurant->res_mainimage)) {
+                        unlink(Yii::$app->basePath . "/web" . $restaurant->res_mainimage);
+                    }
+                    $restaurant->res_mainimage = $response;
+                } else {
+                    Yii::$app->getSession()->setFlash('Se ha creado el restaurante, pero no se subio la imagen Principal, intente más tarde.');
+                }
+            }
+            $img_logo = UploadedFile::getInstance($restaurant, 'img_logo');
+            if (!empty($img_logo)) {
+                $response_second = Utilities::uploadImage('/upload/images/restaurant/', $img_logo);
+                if (!empty($response_second)) {
+                    if (!empty($restaurant->res_logo)) {
+                        unlink(Yii::$app->basePath . "/web" . $restaurant->res_logo);
+                    }
+                    $restaurant->res_logo = $response_second;
+                } else {
+                    Yii::$app->getSession()->setFlash('Se ha creado el restaurante, pero no se subio el logo, intente más tarde.');
+                }
+            }
+
+            if ($restaurant->save()) {
+
+                return $this->redirect(['view', 'id' => $restaurant->id]);
+            }
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        if (User::hasRole('owner')) {
+            return $this->render('owner-update', compact('restaurant'));
+        } else {
+            return $this->render('create', 'restaurant');
+        }
     }
 
-    /**
-     * Deletes an existing Restaurant model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        $restaurant = $this->findModel($id);
+        $restaurant->state = 0;
+        if ($restaurant->save()) {
+            Yii::$app->session->setFlash('success', 'Se ha eliminado Correctamente.');
+        } else {
+            Yii::$app->session->setFlash('error', 'No se ha podido eliminar, intente más tarde');
+        }
+        return $this->redirect(['/site/index']);
     }
 
-    /**
-     * Finds the Restaurant model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Restaurant the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     protected function findModel($id)
     {
         if (($model = Restaurant::findOne(['id' => $id])) !== null) {

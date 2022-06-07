@@ -1,6 +1,14 @@
 # phpstorm project files
 .idea
 
+/web/upload/images/restaurant/*.png
+/web/upload/images/restaurant/*.jpeg
+/web/upload/images/restaurant/*.jpg
+
+/web/upload/images/user-custom/*.png
+/web/upload/images/user-custom/*.jpeg
+/web/upload/images/user-custom/*.jpg
+
 # netbeans project files
 nbproject
 

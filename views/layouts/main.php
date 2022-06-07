@@ -12,6 +12,7 @@ use yii\bootstrap4\Breadcrumbs;
 use webvimark\modules\UserManagement\UserManagementModule;
 
 AppAsset::register($this);
+
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -28,20 +29,36 @@ AppAsset::register($this);
 <body class="d-flex flex-column h-100">
     <?php $this->beginBody() ?>
 
-    <?= $this->render('navbar') ?>
-
-    <main role="main" class="flex-shrink-0">
-        <div class="container">
-            <?= Breadcrumbs::widget([
-                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-            ]) ?>
-            <?= Alert::widget() ?>
-            <?= $content ?>
-        </div>
+    <main class="content">
+        <?= Alert::widget() ?>
+        <?= $content ?>
     </main>
 
-    <div class="wrapper">
-        <?= $this->render('sidebar-left') ?>
+
+
+    <!-- <main role="main" class="wrapper">
+        <?php // $this->render('sidebar-left') 
+        ?>
+        <div class="main-panel">
+            <?php // $this->render('navbar') 
+            ?>
+
+            <div class="content">
+                <?php /* Breadcrumbs::widget([
+                    'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                ]) */ ?>
+                <?php // Alert::widget() 
+                ?>
+                <?php // $content 
+                ?>
+            </div>
+        </div>
+
+    </main> -->
+
+    <!-- <div class="wrapper">
+        <?php // $this->render('sidebar-left') 
+        ?>
         <div class="main-panel">
             {% include './navbar.html' %}
             <div class="content">
@@ -52,7 +69,7 @@ AppAsset::register($this);
 
 
         </div>
-    </div>
+    </div> -->
 
     <footer class="footer mt-auto py-3 text-muted">
         <div class="container">

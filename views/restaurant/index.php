@@ -1,9 +1,10 @@
 <?php
 
-use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\grid\ActionColumn;
+use yii\helpers\Html;
 use yii\grid\GridView;
+use app\models\Restaurant;
+use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\RestaurantSearch */
@@ -20,7 +21,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Restaurant', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); 
+    ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -40,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, Restaurant $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                }
             ],
         ],
     ]); ?>
