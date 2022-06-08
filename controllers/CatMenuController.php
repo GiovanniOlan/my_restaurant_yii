@@ -2,11 +2,17 @@
 
 namespace app\controllers;
 
+use Yii;
+use yii\db\Query;
 use app\models\CatMenu;
-use app\models\CatMenuSearch;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\UserOwner;
+use app\models\Utilities;
+use app\models\Restaurant;
 use yii\filters\VerbFilter;
+use app\models\CatMenuSearch;
+use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * CatMenuController implements the CRUD actions for CatMenu model.
@@ -34,11 +40,6 @@ class CatMenuController extends Controller
         );
     }
 
-    /**
-     * Lists all CatMenu models.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         $searchModel = new CatMenuSearch();
@@ -50,12 +51,6 @@ class CatMenuController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single CatMenu model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
         return $this->render('view', [
@@ -63,35 +58,30 @@ class CatMenuController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new CatMenu model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
     public function actionCreate()
     {
-        $model = new CatMenu();
+        $cat_menu = new CatMenu();
+
+        echo '<pre>';
+        var_dump(Utilities::$restaurant);
+        echo '</pre>';
+        die;
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($cat_menu->load($this->request->post()) && $cat_menu->save()) {
+                return $this->redirect(['view', 'id' => $cat_menu->id]);
             }
         } else {
-            $model->loadDefaultValues();
+            $cat_menu->loadDefaultValues();
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        if (User::hasRole('owner', false)) {
+            return $this->render('owner-create', compact('cat_menu'));
+        } else {
+            return $this->render('create', 'cat_menu');
+        }
     }
 
-    /**
-     * Updates an existing CatMenu model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -105,13 +95,6 @@ class CatMenuController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing CatMenu model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -119,13 +102,22 @@ class CatMenuController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the CatMenu model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return CatMenu the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionCategorias($id)
+    {
+        $restaurant = Restaurant::find()->where(['id' => $id, 'res_fkuserowner' => UserOwner::getUserOwnerLogged()->id])->one();
+
+        if (!empty($restaurant)) {
+            #Its Restaurant of UserOwnerLogged
+            Yii::$app->params['restaurant'];
+            $categories = CatMenu::find()->where(['state' => 1, 'catmen_fkrestaurant' => $id])->all();
+            return $this->render('owner-allcategorys', compact('categories', 'restaurant'));
+        } else {
+            $message = 'No tienes ningun Restaurante con ese ID.';
+            $name = 'Error';
+            return $this->render('/site/error', compact('message', 'name'));
+        }
+    }
+
     protected function findModel($id)
     {
         if (($model = CatMenu::findOne(['id' => $id])) !== null) {

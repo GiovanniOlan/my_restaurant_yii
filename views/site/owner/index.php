@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <div class="block block-two"></div>
                                 <div class="block block-three"></div>
                                 <div class="block block-four"></div>
-                                <a href="">
+                                <a href="/cat-menu/categorias/?id=<?= $res->id ?>">
                                     <img class="avatar" src="<?= $res->getMainImageUrl() ?>" alt="<?= $res->res_name ?>">
                                     <h5 class="title h3"><?= $res->res_name ?></h5>
                                 </a>
