@@ -4,6 +4,11 @@ use app\models\Utilities;
 use app\models\Restaurant;
 
 
+$id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+
+$restaurant = Restaurant::find()->where(['id' => $id_restaurant])->one();
+
+
 ?>
 
 <div class="sidebar">
@@ -13,7 +18,7 @@ use app\models\Restaurant;
                 CT
             </a> -->
             <a href="javascript:void(0)" class="simple-text logo-normal text-center">
-                <?= Restaurant::find()->where(['id' => $restaurant->id])->one()->res_name ?>
+                <?= $restaurant->res_name ?>
             </a>
         </div>
         <ul class="nav">

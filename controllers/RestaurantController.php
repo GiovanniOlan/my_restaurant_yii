@@ -56,7 +56,7 @@ class RestaurantController extends Controller
         if (Yii::$app->user->isSuperAdmin) {
             return $this->render('view', compact('restaurant'));
         }
-        if (User::hasRole('owner')) {
+        if (User::hasRole('owner', false)) {
             return $this->render('owner-view', compact('restaurant'));
         }
     }

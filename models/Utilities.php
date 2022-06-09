@@ -6,7 +6,6 @@ use Yii;
 
 class Utilities
 {
-    public static $restaurant = null;
 
     public static function uploadImage($path, $image)
     {

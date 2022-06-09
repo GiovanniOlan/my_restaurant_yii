@@ -44,7 +44,6 @@ $this->title = $restaurant->res_name;
             <?= DetailView::widget([
                 'model' => $restaurant,
                 'attributes' => [
-                    'id',
                     'res_name',
                     'res_description:ntext',
                     'res_slogan',

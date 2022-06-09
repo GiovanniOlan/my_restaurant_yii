@@ -13,7 +13,7 @@ $this->title = $restaurant->res_name . ": CATEGORIAS";
 
 ?>
 
-<?= $this->render('/layouts/sidebar-left-restaurant', compact('restaurant')) ?>
+<?= $this->render('/layouts/sidebar-left-restaurant') ?>
 
 <div class="main-panel">
     <?= $this->render('/layouts/navbar') ?>
@@ -42,8 +42,8 @@ $this->title = $restaurant->res_name . ": CATEGORIAS";
                                 <div class="block block-two"></div>
                                 <div class="block block-three"></div>
                                 <div class="block block-four"></div>
-                                <a href="/cat-menu-item/platillos/?id=<?= $cat->id ?>">
-                                    <img class="avatar" src="" alt="">
+                                <a href="#">
+                                    <img class="avatar" src="<?= $cat->catmen_image ?>" alt="">
                                     <h5 class="title h3"><?= $cat->catmen_name ?></h5>
                                 </a>
                                 <!-- <p class="description">a</p> -->
@@ -54,8 +54,8 @@ $this->title = $restaurant->res_name . ": CATEGORIAS";
                         </div>
                         <div class="card-footer">
                             <div class="button-container">
-                                <a href="/restaurant/<?= $cat->id ?>" class="btn btn-icon btn-round"><i class="fas fa-solid fa-eye"></i></a>
-                                <a href="/restaurant/update/<?= $cat->id ?>" class="btn btn-icon btn-round"><i class="fas fa-solid fa-eye-dropper"></i></i></a>
+                                <a href="/cat-menu/view?id=<?= $cat->id ?>" class="btn btn-icon btn-round"><i class="fas fa-solid fa-eye"></i></a>
+                                <a href="/cat-menu/update?id=<?= $cat->id ?>" class="btn btn-icon btn-round"><i class="fas fa-solid fa-eye-dropper"></i></i></a>
                             </div>
                         </div>
                     </div>

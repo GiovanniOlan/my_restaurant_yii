@@ -2,11 +2,12 @@
 
 namespace app\controllers;
 
-use app\models\CatMenuItem;
-use app\models\CatMenuItemSearch;
+use Yii;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\CatMenuItem;
 use yii\filters\VerbFilter;
+use app\models\CatMenuItemSearch;
+use yii\web\NotFoundHttpException;
 
 /**
  * CatMenuItemController implements the CRUD actions for CatMenuItem model.
@@ -117,6 +118,15 @@ class CatMenuItemController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionPlatillos()
+    {
+
+        echo '<pre>';
+        var_dump(Yii::$app->getRequest()->getCookies()->getValue('id_restaurant'));
+        echo '</pre>';
+        die;
     }
 
     /**

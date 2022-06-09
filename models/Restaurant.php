@@ -33,6 +33,11 @@ class Restaurant extends \yii\db\ActiveRecord
         return 'RESTAURANT';
     }
 
+    public static function getRestaurant($id)
+    {
+        return self::find()->where(['id' => $id])->one();
+    }
+
     public function rules()
     {
         return [
@@ -104,9 +109,9 @@ class Restaurant extends \yii\db\ActiveRecord
         return (empty($this->res_logo) ? "/upload/images/default/restaurant-logo.png" : "{$this->res_logo}");
     }
 
-    public function getMainImageHtml()
+    public function getMainImageHtml($width = 30, $height = 30)
     {
-        return Html::img($this->getMainImageUrl(), ['alt' => $this->res_name]);
+        return Html::img($this->getMainImageUrl(), ['alt' => $this->res_name, 'width' => "{$width}%", 'height' => "{$height}%"]);
     }
 
     public function getMainImageUrl()
