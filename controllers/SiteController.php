@@ -62,8 +62,7 @@ class SiteController extends Controller
     {
 
         if (User::hasRole('owner', false)) {
-            $in_restaurant = true;
-            return $this->render('owner/index', compact('in_restaurant'));
+            return $this->render('owner/index');
         }
         return $this->render('index');
     }

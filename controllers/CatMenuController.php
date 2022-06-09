@@ -161,7 +161,7 @@ class CatMenuController extends Controller
                 'value' => $restaurant->id,
             ]);
             Yii::$app->getResponse()->getCookies()->add($cookie);
-            $categories = CatMenu::find()->where(['state' => 1, 'catmen_fkrestaurant' => $id])->all();
+            $categories = $restaurant->catMenus;
             return $this->render('owner-allcategorys', compact('categories', 'restaurant'));
         } else {
             $message = 'No tienes ningun Restaurante con ese ID.';

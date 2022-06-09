@@ -74,9 +74,9 @@ class Restaurant extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getCATMENUs()
+    public function getCatMenus()
     {
-        return $this->hasMany(CatMenu::className(), ['catmen_fkrestaurant' => 'id']);
+        return $this->hasMany(CatMenu::className(), ['catmen_fkrestaurant' => 'id'])->where(['state' => 1]);
     }
 
     public function getCLIENTs()

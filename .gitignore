@@ -9,6 +9,14 @@
 /web/upload/images/user-custom/*.jpeg
 /web/upload/images/user-custom/*.jpg
 
+/web/upload/images/cat-menu/*.png
+/web/upload/images/cat-menu/*.jpeg
+/web/upload/images/cat-menu/*.jpg
+
+/web/upload/images/cat-menu-item/*.png
+/web/upload/images/cat-menu-item/*.jpeg
+/web/upload/images/cat-menu-item/*.jpg
+
 # netbeans project files
 nbproject
 

@@ -3,11 +3,17 @@
 namespace app\controllers;
 
 use Yii;
+use app\models\CatMenu;
 use yii\web\Controller;
+use app\models\UserOwner;
+use app\models\Utilities;
+use yii\web\UploadedFile;
+use app\models\Restaurant;
 use app\models\CatMenuItem;
 use yii\filters\VerbFilter;
 use app\models\CatMenuItemSearch;
 use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * CatMenuItemController implements the CRUD actions for CatMenuItem model.
@@ -35,11 +41,6 @@ class CatMenuItemController extends Controller
         );
     }
 
-    /**
-     * Lists all CatMenuItem models.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         $searchModel = new CatMenuItemSearch();
@@ -51,91 +52,117 @@ class CatMenuItemController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single CatMenuItem model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        $cat_menu_item = $this->findModel($id);
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($cat_menu_item->catmeniteFkcatmenu->catmen_fkrestaurant == $id_restaurant) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                return $this->render('owner-view', compact('cat_menu_item', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona una resturante para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
+        }
     }
 
-    /**
-     * Creates a new CatMenuItem model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
     public function actionCreate()
     {
-        $model = new CatMenuItem();
+        $cat_menu_item = new CatMenuItem();
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($id_restaurant != null) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                if ($this->request->isPost) {
+                    if ($cat_menu_item->load($this->request->post())) {
+                        $cat_menu_item->state = 1;
+                        $img = UploadedFile::getInstance($cat_menu_item, 'img');
+                        if (!empty($img)) {
+                            $response = Utilities::uploadImage('/upload/images/cat-menu-item/', $img);
+                            if (!empty($response)) {
+                                $cat_menu_item->catmenite_image = $response;
+                            } else {
+                                Yii::$app->getSession()->setFlash('Se ha creado el platillo, pero no se subio la imagen, pruebe editandolo más tarde.');
+                            }
+                        }
+                        if ($cat_menu_item->save()) {
+                            return $this->redirect(['view', 'id' => $cat_menu_item->id]);
+                        }
+                    }
+                } else {
+                    $cat_menu_item->loadDefaultValues();
+                }
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+                return $this->render('owner-create', compact('cat_menu_item', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona una resturante para acceder a más opciones.');
+                return $this->redirect(['/']);
             }
-        } else {
-            $model->loadDefaultValues();
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
-    /**
-     * Updates an existing CatMenuItem model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $cat_menu_item = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($cat_menu_item->catmeniteFkcatmenu->catmen_fkrestaurant == $id_restaurant) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                if ($this->request->isPost && $cat_menu_item->load($this->request->post())) {
+                    $img = UploadedFile::getInstance($cat_menu_item, 'img');
+                    if (!empty($img)) {
+                        $response = Utilities::uploadImage('/upload/images/cat-menu-item/', $img);
+                        if (!empty($response)) {
+                            if (!empty($cat_menu_item->catmenite_image)) {
+                                unlink(Yii::$app->basePath . "/web" . $cat_menu_item->catmenite_image);
+                            }
+                            $cat_menu_item->catmenite_image = $response;
+                        } else {
+                            Yii::$app->getSession()->setFlash('Se ha creado el platillo, pero no se subio la imagen, pruebe editandolo más tarde.');
+                        }
+                    }
+                    if ($cat_menu_item->save()) {
+                        return $this->redirect(['view', 'id' => $cat_menu_item->id]);
+                    }
+                }
+
+                return $this->render('owner-update', compact('restaurant', 'cat_menu_item'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona uno de tus resturantes para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
-    /**
-     * Deletes an existing CatMenuItem model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        $cat_menu_item = $this->findModel($id);
+        $cat_menu_item->state = 0;
+        if ($cat_menu_item->save()) {
+            Yii::$app->session->setFlash('success', 'El platillo se ha elimando correctamente.');
+        } else {
+            Yii::$app->session->setFlash('error', 'No se ha podido eliminar el platillo, intente más tarde.');
+        }
+        return $this->redirect(['platillos']);
     }
 
     public function actionPlatillos()
     {
-
-        echo '<pre>';
-        var_dump(Yii::$app->getRequest()->getCookies()->getValue('id_restaurant'));
-        echo '</pre>';
-        die;
+        if (User::hasRole('owner')) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($id_restaurant != null) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                $categories = $restaurant->catMenus;
+                return $this->render('owner-allPlatillos', compact('categories', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona uno de tus resturantes para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
+        }
     }
 
-    /**
-     * Finds the CatMenuItem model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return CatMenuItem the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     protected function findModel($id)
     {
         if (($model = CatMenuItem::findOne(['id' => $id])) !== null) {

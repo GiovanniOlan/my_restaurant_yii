@@ -14,7 +14,7 @@ use yii\helpers\Html;
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Mis Restaurantes</a></li>
                 <li class="breadcrumb-item"><a href="/restaurant/view/<?= $restaurant->id ?>"><?= $restaurant->res_name ?></a></li>
-                <li class="breadcrumb-item"><a href="/restaurant/view/<?= $restaurant->id ?>">Categorias</a></li>
+                <li class="breadcrumb-item"><a href="/cat-menu/categorias/?id=<?= $restaurant->id ?>">Categorias</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Agregar</li>
             </ol>
         </nav>
