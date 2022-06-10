@@ -79,14 +79,14 @@ class Restaurant extends \yii\db\ActiveRecord
         return $this->hasMany(CatMenu::className(), ['catmen_fkrestaurant' => 'id'])->where(['state' => 1]);
     }
 
-    public function getCLIENTs()
+    public function getClients()
     {
         return $this->hasMany(Client::className(), ['cli_fkrestaurant' => 'id']);
     }
 
-    public function getEMPLEADOs()
+    public function getEmpleados()
     {
-        return $this->hasMany(Empleado::className(), ['emp_fkrestaurant' => 'id']);
+        return $this->hasMany(Empleado::className(), ['emp_fkrestaurant' => 'id'])->where(['state' => 1]);
     }
 
     public function getResFkuserowner()

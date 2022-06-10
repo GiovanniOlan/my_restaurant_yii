@@ -87,6 +87,6 @@ class Empleado extends \yii\db\ActiveRecord
      */
     public function getEmpFkusercustom()
     {
-        return $this->hasOne(USERCUSTOM::className(), ['id' => 'emp_fkusercustom']);
+        return $this->hasOne(UserCustom::className(), ['id' => 'emp_fkusercustom']);
     }
 }

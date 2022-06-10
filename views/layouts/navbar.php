@@ -1,7 +1,8 @@
 <?php
 
-use Yii;
+use yii\bootstrap4\Html;
 use app\models\UserCustom;
+use webvimark\modules\UserManagement\UserManagementModule;
 
 if (!Yii::$app->user->isSuperAdmin) {
 
@@ -58,7 +59,13 @@ if (!Yii::$app->user->isSuperAdmin) {
                 <li class="dropdown nav-item">
                     <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
                         <div class="photo">
-                            <img src="<?= $usercustom_logged->getPhotoUrl(); ?>" alt="Profile Photo">
+                            <?php if (Yii::$app->user->isSuperAdmin) : ?>
+                                <img src="/upload/images/default/user-defautl.png" alt="Profile Photo">
+                            <?php endif ?>
+                            <?php if (!Yii::$app->user->isSuperAdmin) : ?>
+                                <img src="<?= $usercustom_logged->getPhotoUrl(); ?>" alt="Profile Photo">
+                            <?php endif ?>
+
                         </div>
                         <b class="caret d-none d-lg-block d-xl-block"></b>
                         <p class="d-lg-none">
@@ -82,7 +89,6 @@ if (!Yii::$app->user->isSuperAdmin) {
                         <?php if (Yii::$app->user->isGuest) : ?>
                             <li class="nav-link"><a href="/user-owner/register" class="nav-item dropdown-item">Crear Cuenta</a></li>
                         <?php endif ?>
-
                     </ul>
                 </li>
                 <li class="separator d-lg-none"></li>

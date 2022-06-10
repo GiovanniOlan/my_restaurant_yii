@@ -2,11 +2,17 @@
 
 namespace app\controllers;
 
-use app\models\Empleado;
-use app\models\EmpleadoSearch;
+use Yii;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\Empleado;
+use app\models\Utilities;
+use yii\web\UploadedFile;
+use app\models\Restaurant;
+use app\models\UserCustom;
 use yii\filters\VerbFilter;
+use app\models\EmpleadoSearch;
+use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * EmpleadoController implements the CRUD actions for Empleado model.
@@ -50,82 +56,148 @@ class EmpleadoController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Empleado model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        $empleado = $this->findModel($id);
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($empleado->empFkrestaurant->id == $id_restaurant) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                return $this->render('owner-view', compact('empleado', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona una resturante para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
+        }
     }
 
-    /**
-     * Creates a new Empleado model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
     public function actionCreate()
     {
-        $model = new Empleado();
+        $user = new User;
+        $user_custom = new UserCustom;
+        $empleado = new Empleado;
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($id_restaurant != null) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                if ($this->request->isPost) {
+                    if ($empleado->load($this->request->post()) && $user->load($this->request->post()) &&  $user_custom->load($this->request->post())) {
+                        $user->auth_key        = Yii::$app->security->generateRandomString();
+                        $user->password_hash   = Yii::$app->security->generatePasswordHash($user->password);
+                        $user->status          = 1;
+                        $user->created_at      = time();
+                        $user->updated_at      = time();
+                        $user->email_confirmed = 1;
+                        if ($user->save()) {
+                            User::assignRole($user->id, "restaurant_empleado");
+                            $user_custom->usu_fkuser = $user->id;
+                            $img = UploadedFile::getInstance($user_custom, 'img');
+                            if (!empty($img)) {
+                                $response = Utilities::uploadImage('/upload/images/user-custom/', $img);
+                                if (!empty($response)) {
+                                    $user_custom->usu_photo = $response;
+                                } else {
+                                    Yii::$app->session->setFlash('Se ha creado el Empleado, pero no se subio la imagen, pruebe editando la categoria.');
+                                }
+                            }
+                            if ($user_custom->save()) {
+                                $empleado->emp_fkusercustom = $user_custom->id;
+                                $empleado->state = 1;
+                                $empleado->emp_fkrestaurant = $restaurant->id;
+                                if ($empleado->save()) {
+                                    return $this->redirect(['view', 'id' => $empleado->id]);
+                                }
+                                $user_custom->delete();
+                            }
+                            $user->delete();
+                        }
+                        Yii::$app->session->setFlash('Error', 'No se guardar tu usuario, intentelo mas tarde');
+                    }
+                } else {
+                    $empleado->loadDefaultValues();
+                }
+
+                return $this->render('owner-create', compact('empleado', 'user', 'user_custom', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona una resturante para acceder a más opciones.');
+                return $this->redirect(['/']);
             }
-        } else {
-            $model->loadDefaultValues();
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
-    /**
-     * Updates an existing Empleado model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $empleado = $this->findModel($id);
+        $user_custom = $empleado->empFkusercustom;
+        $user = $user_custom->usuFkuser;
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (User::hasRole('owner', false)) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($empleado->emp_fkrestaurant == $id_restaurant) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                if ($this->request->isPost) {
+                    if ($empleado->load($this->request->post())) {
+                        $empleado->save();
+                    }
+                    if ($user_custom->load($this->request->post())) {
+                        $img = UploadedFile::getInstance($user_custom, 'img');
+                        if (!empty($img)) {
+                            $response = Utilities::uploadImage('/upload/images/user-custom/', $img);
+                            if (!empty($response)) {
+                                if (!empty($user_custom->usu_photo)) {
+                                    unlink(Yii::$app->basePath . "/web" . $user_custom->usu_photo);
+                                }
+                                $user_custom->usu_photo = $response;
+                            } else {
+                                Yii::$app->getSession()->setFlash('Se ha creado el empleado, pero no se subio la imagen, pruebe editandolo más tarde.');
+                            }
+                        }
+                        $user_custom->save();
+                    }
+                    if ($user->load($this->request->post())) {
+                        $user->save();
+                    }
+                    return $this->redirect(['view', 'id' => $empleado->id]);
+                }
+
+                return $this->render('owner-update', compact('restaurant', 'empleado', 'user', 'user_custom'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona uno de tus resturantes para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
-    /**
-     * Deletes an existing Empleado model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $empleado = $this->findModel($id);
+        $empleado->state = 0;
 
-        return $this->redirect(['index']);
+        if ($empleado->save()) {
+            Yii::$app->session->setFlash('success', 'El Personal se ha elimando correctamente.');
+        } else {
+            Yii::$app->session->setFlash('error', 'No se ha podido eliminar el platillo, intente más tarde.');
+        }
+        return $this->redirect(['todos']);
     }
 
-    /**
-     * Finds the Empleado model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Empleado the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionTodos()
+    {
+        if (User::hasRole('owner')) {
+            $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
+            if ($id_restaurant != null) {
+                $restaurant = Restaurant::getRestaurant($id_restaurant);
+                $empleados = $restaurant->empleados;
+                return $this->render('owner-allEmpleados', compact('empleados', 'restaurant'));
+            } else {
+                Yii::$app->session->setFlash('error', 'Selecciona uno de tus resturantes para acceder a más opciones.');
+                return $this->redirect(['/']);
+            }
+        }
+    }
+
     protected function findModel($id)
     {
         if (($model = Empleado::findOne(['id' => $id])) !== null) {

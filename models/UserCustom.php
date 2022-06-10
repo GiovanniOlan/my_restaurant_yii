@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\bootstrap4\Html;
 use webvimark\modules\UserManagement\models\User;
 
 /**
@@ -26,6 +27,8 @@ use webvimark\modules\UserManagement\models\User;
 class UserCustom extends \yii\db\ActiveRecord
 {
 
+    public $img;
+
 
     public static function getUserCustom($id_user)
     {
@@ -46,6 +49,8 @@ class UserCustom extends \yii\db\ActiveRecord
             [['usu_fkgender', 'usu_fkuser'], 'integer'],
             [['usu_nombre', 'usu_paterno', 'usu_materno'], 'string', 'max' => 30],
             [['usu_photo'], 'string', 'max' => 255],
+            [['img'], 'file', 'extensions'   => 'jpg, jpeg, png'],
+            [['img'], 'file', 'maxSize'      => '500000'],
             [['usu_fkuser'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['usu_fkuser' => 'id']],
             [['usu_fkgender'], 'exist', 'skipOnError' => true, 'targetClass' => CatGender::className(), 'targetAttribute' => ['usu_fkgender' => 'id']],
         ];
@@ -63,6 +68,7 @@ class UserCustom extends \yii\db\ActiveRecord
             'usu_materno' => 'Apellido Materno',
             'usu_datebirth' => 'Dia De Nacimiento',
             'usu_photo' => 'Foto De Perfil',
+            'img' => 'Foto De Perfil',
             'usu_fkgender' => 'Género',
             'usu_fkuser' => 'User',
         ];
@@ -121,5 +127,15 @@ class UserCustom extends \yii\db\ActiveRecord
     public function getPhotoUrl()
     {
         return (empty($this->usu_photo) ? "/upload/images/default/user-default.png" : $this->usu_photo);
+    }
+
+    public function getPhotoHtml($width = 30, $height = 30)
+    {
+        return Html::img($this->getPhotoUrl(), ['width' => "{$width}%", 'height' => "{$height}%"]);
+    }
+
+    public function getLongName()
+    {
+        return "{$this->usu_nombre} {$this->usu_paterno} {$this->usu_materno}";
     }
 }

@@ -1,5 +1,8 @@
 <?php
 
+use yii\bootstrap4\Html;
+use webvimark\modules\UserManagement\UserManagementModule;
+
 
 ?>
 
@@ -26,6 +29,20 @@
                     <p>Agregar Restaurante</p>
                 </a>
             </li>
+            <?php if (Yii::$app->user->isSuperAdmin) : ?>
+                <li class="dropdown">
+                    <a href="javascript:;" class="dropdown-toggle">
+                        <span class="micon dw dw-user-13"></span><span class="mtext">Gestion de Usuarios</span>
+                    </a>
+                    <ul class="submenu">
+                        <li class="micon dw dw-user-2"><a href=" /user-management/user/index"> <?= Html::encode(UserManagementModule::t('back', 'Users')) ?></a></li>
+                        <li class="micon "><a href="/user-management/role/index"> <?= Html::encode(UserManagementModule::t('back', 'Roles')) ?></a></li>
+                        <li class="micon "><a href="/user-management/permission/index"> <?= Html::encode(UserManagementModule::t('back', 'Permissions')) ?></a></li>
+                        <li class="micon "><a href="/user-management/auth-item-group/index"> <?= Html::encode(UserManagementModule::t('back', 'Permission groups')) ?></a></li>
+                        <li class="micon "><a href="/user-management/user-visit-log/index"> <?= Html::encode(UserManagementModule::t('back', 'Visit log')) ?></a></li>
+                    </ul>
+                </li>
+            <?php endif ?>
             <li>
                 <a href="">
                     <i class="tim-icons icon-atom"></i>

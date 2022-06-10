@@ -29,32 +29,36 @@ AppAsset::register($this);
 <body class="d-flex flex-column h-100">
     <?php $this->beginBody() ?>
 
-    <main class="content">
-        <?= Alert::widget() ?>
-        <?= $content ?>
-    </main>
-
-
-
-    <!-- <main role="main" class="wrapper">
-        <?php // $this->render('sidebar-left') 
-        ?>
-        <div class="main-panel">
-            <?php // $this->render('navbar') 
+    <?php if (Yii::$app->user->isSuperAdmin) : ?>
+        <main role="main" class="wrapper">
+            <?= $this->render('sidebar-left')
             ?>
+            <div class="main-panel">
+                <?= $this->render('navbar')
+                ?>
 
-            <div class="content">
-                <?php /* Breadcrumbs::widget([
-                    'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-                ]) */ ?>
-                <?php // Alert::widget() 
-                ?>
-                <?php // $content 
-                ?>
+                <div class="content">
+                    <?= Breadcrumbs::widget([
+                        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                    ]) ?>
+                    <?= Alert::widget() ?>
+                    <?= $content ?>
+                </div>
             </div>
-        </div>
 
-    </main> -->
+        </main>
+    <?php endif ?>
+
+    <?php if (!Yii::$app->user->isSuperAdmin) : ?>
+        <main class="content">
+            <?= Alert::widget() ?>
+            <?= $content ?>
+        </main>
+    <?php endif ?>
+
+
+
+
 
     <!-- <div class="wrapper">
         <?php // $this->render('sidebar-left') 
