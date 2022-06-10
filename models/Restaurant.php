@@ -94,7 +94,7 @@ class Restaurant extends \yii\db\ActiveRecord
         return $this->hasOne(Userowner::className(), ['id' => 'res_fkuserowner']);
     }
 
-    public function getTICKETs()
+    public function getTickets()
     {
         return $this->hasMany(Ticket::className(), ['tic_fkrestaurant' => 'id']);
     }

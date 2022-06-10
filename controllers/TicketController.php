@@ -5,8 +5,10 @@ namespace app\controllers;
 use Yii;
 use app\models\Cart;
 use app\models\Client;
+use app\models\Compra;
 use app\models\Ticket;
 use yii\web\Controller;
+use app\models\Empleado;
 use app\models\TicketItem;
 use yii\filters\VerbFilter;
 use app\models\TicketSearch;
@@ -153,6 +155,44 @@ class TicketController extends Controller
         #$pedidos = Ticket::find()->where(['tic_fkclient' => $client->id])->all();
 
         return $this->render('client-allPedidos', compact('restaurant', 'client'));
+    }
+
+    public function actionCancel($id)
+    {
+        $ticket = $this->findModel($id);
+        $ticket->state = 0;
+        $ticket->save();
+
+        Yii::$app->session->setFlash('success', "Se ha cancelado correctamente la orden, el dinero se le devolvera al cliente.");
+
+        return $this->redirect(['/empleado']);
+    }
+    public function actionAceptar($id)
+    {
+        $ticket = $this->findModel($id);
+        $ticket->state = 2;
+        if ($ticket->save()) {
+
+            $compra = new Compra;
+            $compra->state = 1;
+            $compra->created_date = date('Y-m-d h:i:s');
+            $compra->update_date = date('Y-m-d h:i:s');
+            $compra->delete_date = date('Y-m-d h:i:s');
+            $compra->com_fkempleado = Empleado::getEmpleadoLogged()->id;
+            $compra->com_fkticket = $ticket->id;
+            if ($compra->save()) {
+                Yii::$app->session->setFlash('success', "La orden ha sido aceptada, el cliente vendra en cualquier momento a buscar su orden.");
+
+                return $this->redirect(['/empleado']);
+            } else {
+                // $ticket->state = 1;
+                // $ticket->save();
+                echo '<pre>';
+                var_dump($compra->errors);
+                echo '</pre>';
+                die;
+            }
+        }
     }
 
 

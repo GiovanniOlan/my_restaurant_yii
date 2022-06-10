@@ -29,6 +29,12 @@ class Empleado extends \yii\db\ActiveRecord
         return 'EMPLEADO';
     }
 
+    public static function getEmpleadoLogged()
+    {
+        $user_custom = UserCustom::getUserCustom(Yii::$app->user->id);
+        return $user_custom->empleados[0];
+    }
+
     /**
      * {@inheritdoc}
      */

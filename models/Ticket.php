@@ -108,4 +108,15 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Client::className(), ['id' => 'tic_fkrestaurant']);
     }
+
+    public function getStringState()
+    {
+        if ($this->state == 0) {
+            return 'Cancelado';
+        } else if ($this->state == 1) {
+            return 'En Proceso';
+        } else {
+            return 'Aceptada';
+        }
+    }
 }

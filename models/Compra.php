@@ -35,8 +35,7 @@ class Compra extends \yii\db\ActiveRecord
     {
         return [
             [['created_date', 'update_date', 'delete_date'], 'safe'],
-            [['com_fkempleado', 'com_fkticket'], 'integer'],
-            [['state'], 'string', 'max' => 255],
+            [['state', 'com_fkempleado', 'com_fkticket'], 'integer'],
             [['com_fkempleado'], 'exist', 'skipOnError' => true, 'targetClass' => Empleado::className(), 'targetAttribute' => ['com_fkempleado' => 'id']],
             [['com_fkticket'], 'exist', 'skipOnError' => true, 'targetClass' => Ticket::className(), 'targetAttribute' => ['com_fkticket' => 'id']],
         ];

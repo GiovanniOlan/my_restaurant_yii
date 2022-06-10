@@ -47,13 +47,19 @@ class EmpleadoController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new EmpleadoSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        if (User::hasRole('restaurant_empleado', false)) {
+            $empleado = Empleado::getEmpleadoLogged();
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+            return $this->render('empleado-pedidos', compact('empleado'));
+        } else {
+            $searchModel = new EmpleadoSearch();
+            $dataProvider = $searchModel->search($this->request->queryParams);
+
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        }
     }
 
     public function actionView($id)
