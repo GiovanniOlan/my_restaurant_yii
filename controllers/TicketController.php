@@ -2,20 +2,20 @@
 
 namespace app\controllers;
 
+use Yii;
+use app\models\Cart;
+use app\models\Client;
 use app\models\Ticket;
-use app\models\TicketSearch;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\TicketItem;
 use yii\filters\VerbFilter;
+use app\models\TicketSearch;
+use yii\web\NotFoundHttpException;
 
-/**
- * TicketController implements the CRUD actions for Ticket model.
- */
+
 class TicketController extends Controller
 {
-    /**
-     * @inheritDoc
-     */
+
     public function behaviors()
     {
         return array_merge(
@@ -34,11 +34,7 @@ class TicketController extends Controller
         );
     }
 
-    /**
-     * Lists all Ticket models.
-     *
-     * @return string
-     */
+
     public function actionIndex()
     {
         $searchModel = new TicketSearch();
@@ -50,12 +46,7 @@ class TicketController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Ticket model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
     public function actionView($id)
     {
         return $this->render('view', [
@@ -63,11 +54,7 @@ class TicketController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Ticket model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
+
     public function actionCreate()
     {
         $model = new Ticket();
@@ -85,13 +72,7 @@ class TicketController extends Controller
         ]);
     }
 
-    /**
-     * Updates an existing Ticket model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -105,13 +86,7 @@ class TicketController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing Ticket model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -119,13 +94,68 @@ class TicketController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Ticket model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Ticket the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionGenerate()
+    {
+        $client = Client::getClientLogged();
+        $items_cart = Cart::find()->where(['car_fkclient' => $client->id, 'state' => 1])->all();
+
+        $items_cart_total = (new \yii\db\Query())
+            ->select(['SUM(car_subtotal) AS total'])
+            ->from('CART')
+            ->where(['car_fkclient' => $client->id, 'state' => 1])
+            ->one();
+        if (empty($items_cart)) {
+            Yii::$app->session->setFlash('error', 'Tienes que agregar platillos a tu carrito primero.');
+            return $this->redirect(['/']);
+        } else {
+
+
+            $ticket = new Ticket;
+            $ticket->state = 1;
+            $ticket->created_date = date('Y-m-d h:i:s');
+            $ticket->delete_date = date('Y-m-d h:i:s');
+            $ticket->update_date = date('Y-m-d h:i:s');
+            $ticket->tic_total = $items_cart_total['total'];
+            $ticket->tic_clientname = $client->cliFkusercustom->longName;
+            $ticket->tic_file = 'nada.pdf';
+            $ticket->tic_fkclient = $client->id;
+            $ticket->tic_fkrestaurant = $client->cli_fkrestaurant;
+
+            if ($ticket->save()) {
+                foreach ($items_cart as $i) {
+                    $ticket_item = new TicketItem;
+                    $ticket_item->state = 1;
+                    $ticket_item->ticite_itemname = $i->carFkcatmenuitem->catmenite_name;
+                    $ticket_item->ticite_quantity = $i->car_quantity;
+                    $ticket_item->ticite_price = $i->carFkcatmenuitem->catmenite_price;
+                    $ticket_item->ticite_subtotal = $i->car_subtotal;
+                    $ticket_item->ticite_fkticket = $ticket->id;
+                    $ticket_item->ticite_fkcatmenuitem = $i->car_fkcatmenuitem;
+                    $ticket_item->created_date = date('Y-m-d h:i:s');
+                    $ticket_item->created_delete = date('Y-m-d h:i:s');
+                    $ticket_item->created_update = date('Y-m-d h:i:s');
+
+                    $i->state = 2; //2 quiere decir que lo compraron.
+                    $i->save();
+
+                    $ticket_item->save();
+                }
+                Yii::$app->session->setFlash('success', "Muchas gracias por tú compra, se ha hecho un cargo a tu tarjeta de {$items_cart_total['total']}");
+                return $this->redirect(['/']);
+            }
+        }
+    }
+
+    public function actionPedidos()
+    {
+        $client = Client::getClientLogged();
+        $restaurant = $client->cliFkrestaurant;
+        #$pedidos = Ticket::find()->where(['tic_fkclient' => $client->id])->all();
+
+        return $this->render('client-allPedidos', compact('restaurant', 'client'));
+    }
+
+
     protected function findModel($id)
     {
         if (($model = Ticket::findOne(['id' => $id])) !== null) {

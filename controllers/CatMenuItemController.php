@@ -3,12 +3,14 @@
 namespace app\controllers;
 
 use Yii;
+use app\models\Client;
 use app\models\CatMenu;
 use yii\web\Controller;
 use app\models\UserOwner;
 use app\models\Utilities;
 use yii\web\UploadedFile;
 use app\models\Restaurant;
+use app\models\UserCustom;
 use app\models\CatMenuItem;
 use yii\filters\VerbFilter;
 use app\models\CatMenuItemSearch;
@@ -150,7 +152,7 @@ class CatMenuItemController extends Controller
 
     public function actionPlatillos()
     {
-        if (User::hasRole('owner')) {
+        if (User::hasRole('owner', false)) {
             $id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
             if ($id_restaurant != null) {
                 $restaurant = Restaurant::getRestaurant($id_restaurant);
@@ -160,6 +162,11 @@ class CatMenuItemController extends Controller
                 Yii::$app->session->setFlash('error', 'Selecciona uno de tus resturantes para acceder a más opciones.');
                 return $this->redirect(['/']);
             }
+        }
+        if (User::hasRole('restaurant_client', false)) {
+            $restaurant = Client::getClientLogged()->cliFkrestaurant;
+            $categories = $restaurant->catMenus;
+            return $this->render('client-allPlatillos', compact('categories', 'restaurant'));
         }
     }
 

@@ -64,7 +64,11 @@ class SiteController extends Controller
         if (User::hasRole('owner', false)) {
             return $this->render('owner/index');
         }
-        return $this->render('index');
+        // if (User::hasRole('restaurant_empleado', false)) {
+        //     return $this->redirect(['/'])
+        // }
+        if (User::hasRole('restaurant_client', false))
+            return $this->redirect(['/cat-menu-item/platillos']);
     }
 
     /**

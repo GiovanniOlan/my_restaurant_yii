@@ -2,11 +2,16 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Cart;
-use app\models\CartSearch;
+use yii\web\Response;
+use app\models\Client;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\CartSearch;
+use app\models\Restaurant;
 use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * CartController implements the CRUD actions for Cart model.
@@ -41,13 +46,20 @@ class CartController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new CartSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        if (User::hasRole('restaurant_client', false)) {
+            $client = Client::getClientLogged();
+            $restaurant = Restaurant::getRestaurant($client->cli_fkrestaurant);
+            $items_cart = $client->carts;
+            return $this->render('client-cart', compact('restaurant', 'client', 'items_cart'));
+        } else {
+            $searchModel = new CartSearch();
+            $dataProvider = $searchModel->search($this->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        }
     }
 
     /**
@@ -133,5 +145,63 @@ class CartController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionAddCart()
+    {
+        if (Yii::$app->request->isAjax) {
+            $car_fkcatmenuitem = $this->request->post('cat_menu_item_id');
+            $car_quantity = $this->request->post('quantity');
+            $item_price = $this->request->post('price');
+
+            $car_exist = Cart::find()->where(['car_fkcatmenuitem' => $car_fkcatmenuitem, 'car_fkclient' => Client::getClientLogged()->id, 'state' => 1])->one();
+            if (empty($car_exist)) {
+                $cart = new Cart();
+                $cart->state = 1;
+                $cart->car_fkcatmenuitem = $car_fkcatmenuitem;
+                $cart->car_quantity = $car_quantity;
+                $cart->car_subtotal = ($item_price * $cart->car_quantity);
+                $cart->car_fkclient = Client::getClientLogged()->id;
+            } else {
+                $car_exist->car_quantity += $car_quantity;
+                $car_exist->car_subtotal = ($item_price * $car_exist->car_quantity);
+                $cart = $car_exist;
+            }
+            $response = Yii::$app->response;
+            $response->format = Response::FORMAT_JSON;
+            if ($cart->save()) {
+                $response->data = true;
+                return $response;
+            } else {
+                $response->data = false;
+                return $response;
+            }
+            return $response;
+        } else {
+            Yii::$app->session->setFlash('error', 'No tienes permitido esta acción');
+            return $this->redirect(['/']);
+        }
+    }
+
+    public function actionDeleteItemCart()
+    {
+        if (Yii::$app->request->isAjax) {
+
+            $id = $this->request->post('cart_id');
+            $cart = $this->findModel($id);
+            $cart->state = 0;
+
+            $response = Yii::$app->response;
+            $response->format = Response::FORMAT_JSON;
+            if ($cart->save()) {
+                $response->data = true;
+            } else {
+                $response->data = false;
+            }
+            return $response;
+        } else {
+            Yii::$app->session->setFlash('error', 'No tienes permitido esta acción');
+            return $this->redirect(['/']);
+        }
     }
 }

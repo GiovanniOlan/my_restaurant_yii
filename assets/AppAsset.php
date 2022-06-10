@@ -34,6 +34,7 @@ class AppAsset extends AssetBundle
     public $js = [
         // Main Template
         //'template/main/js/core/jquery.min.js',
+        'js/script.js',
         'template/main/js/core/popper.min.js',
         'template/main/js/core/bootstrap.min.js',
         'template/main/js/plugins/perfect-scrollbar.jquery.min.js',

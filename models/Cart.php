@@ -63,7 +63,7 @@ class Cart extends \yii\db\ActiveRecord
      */
     public function getCarFkcatmenuitem()
     {
-        return $this->hasOne(CatMenuitem::className(), ['id' => 'car_fkcatmenuitem']);
+        return $this->hasOne(CatMenuItem::className(), ['id' => 'car_fkcatmenuitem']);
     }
 
     /**

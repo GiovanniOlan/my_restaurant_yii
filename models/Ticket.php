@@ -84,9 +84,9 @@ class Ticket extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTICKETITEMs()
+    public function getTicketItems()
     {
-        return $this->hasMany(Ticketitem::className(), ['ticite_fkticket' => 'id']);
+        return $this->hasMany(TicketItem::className(), ['ticite_fkticket' => 'id']);
     }
 
     /**

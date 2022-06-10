@@ -4,32 +4,21 @@ namespace app\models;
 
 use Yii;
 
-/**
- * This is the model class for table "CLIENT".
- *
- * @property int $id ID
- * @property int $state Estado
- * @property int $cli_fkrestaurant Restaurant
- * @property int $cli_fkusercustom User Custom
- *
- * @property CART[] $cARTs
- * @property RESTAURANT $cliFkrestaurant
- * @property USERCUSTOM $cliFkusercustom
- * @property TICKET[] $tICKETs
- */
 class Client extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public static function tableName()
     {
         return 'CLIENT';
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public static function getClientLogged()
+    {
+        $user_custom = UserCustom::getUserCustom(Yii::$app->user->id);
+        return $user_custom->clients[0];
+    }
+
+
     public function rules()
     {
         return [
@@ -58,9 +47,9 @@ class Client extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCARTs()
+    public function getCarts()
     {
-        return $this->hasMany(Cart::className(), ['car_fkclient' => 'id']);
+        return $this->hasMany(Cart::className(), ['car_fkclient' => 'id'])->where(['state' => 1]);
     }
 
     /**
@@ -88,8 +77,8 @@ class Client extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTICKETs()
+    public function getTickets()
     {
-        return $this->hasMany(Ticket::className(), ['tic_fkclient' => 'id']);
+        return $this->hasMany(Ticket::className(), ['tic_fkclient' => 'id'])->orderBy(['created_date' => SORT_DESC]);
     }
 }

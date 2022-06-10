@@ -2,20 +2,24 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Client;
-use app\models\ClientSearch;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use app\models\Utilities;
+use yii\web\UploadedFile;
+use app\models\UserCustom;
 use yii\filters\VerbFilter;
+use app\models\ClientSearch;
+use yii\web\NotFoundHttpException;
+use webvimark\modules\UserManagement\models\User;
 
-/**
- * ClientController implements the CRUD actions for Client model.
- */
+
 class ClientController extends Controller
 {
-    /**
-     * @inheritDoc
-     */
+
+    public $freeAccessActions = ['register'];
+
+
     public function behaviors()
     {
         return array_merge(
@@ -34,11 +38,6 @@ class ClientController extends Controller
         );
     }
 
-    /**
-     * Lists all Client models.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         $searchModel = new ClientSearch();
@@ -50,12 +49,6 @@ class ClientController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Client model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
         return $this->render('view', [
@@ -63,11 +56,6 @@ class ClientController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Client model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
     public function actionCreate()
     {
         $model = new Client();
@@ -85,13 +73,6 @@ class ClientController extends Controller
         ]);
     }
 
-    /**
-     * Updates an existing Client model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -105,13 +86,6 @@ class ClientController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing Client model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -119,13 +93,51 @@ class ClientController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Client model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Client the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionRegister()
+    {
+
+        $client = new Client;
+        $user = new User;
+        $user_custom = new UserCustom;
+
+        if ($this->request->isPost) {
+            if ($client->load($this->request->post()) && $user->load($this->request->post()) &&  $user_custom->load($this->request->post())) {
+                $user->auth_key        = Yii::$app->security->generateRandomString();
+                $user->password_hash   = Yii::$app->security->generatePasswordHash($user->password);
+                $user->status          = 1;
+                $user->created_at      = time();
+                $user->updated_at      = time();
+                $user->email_confirmed = 1;
+                if ($user->save()) {
+                    User::assignRole($user->id, "restaurant_client");
+                    $user_custom->usu_fkuser = $user->id;
+                    $img = UploadedFile::getInstance($user_custom, 'img');
+                    if (!empty($img)) {
+                        $response = Utilities::uploadImage('/upload/images/user-custom/', $img);
+                        if (!empty($response)) {
+                            $user_custom->usu_photo = $response;
+                        } else {
+                            Yii::$app->session->setFlash('Te has registrado, pero no se subio la imagen, pruebe editando tu informacion.');
+                        }
+                    }
+                    if ($user_custom->save()) {
+                        $client->cli_fkusercustom = $user_custom->id;
+                        $client->state = 1;
+                        if ($client->save()) {
+                            return $this->redirect(['/']);
+                        }
+                        $user_custom->delete();
+                    }
+                    $user->delete();
+                }
+                Yii::$app->session->setFlash('Error', 'No se guardar tu usuario, intentelo mas tarde');
+            }
+        } else {
+            $client->loadDefaultValues();
+        }
+        return $this->render('register', compact('client', 'user', 'user_custom'));
+    }
+
     protected function findModel($id)
     {
         if (($model = Client::findOne(['id' => $id])) !== null) {
