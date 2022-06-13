@@ -30,3 +30,20 @@ function deleteItemCart(id){
         });    
     }
 }
+
+function generarReportes(){
+
+    let fechaInicial = $('#fecha-inicial').val();
+    let fechaFinal = $('#fecha-final').val();
+
+    $.post('/restaurant/reportes', {fechaInicial:fechaInicial, fechaFinal:fechaFinal}, function(data) {
+        console.log(data);
+        // if (data) {
+        //     alert('Se ha elimando correctamente del carrito');
+        //     window.location.reload()
+        // }else{
+        //     alert('Ha ocurrido un error, intente más tarde');
+        // }
+    });
+    
+}

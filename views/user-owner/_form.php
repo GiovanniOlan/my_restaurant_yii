@@ -42,7 +42,7 @@ use yii\helpers\ArrayHelper;
             'language'      => 'es',
             'pluginOptions' => [
                 'allowedFileExtensions' =>  ['jpg', 'gif', 'png'],
-                'initialPreview'        => [$user_custom->getUrl()],
+                'initialPreview'        => [$user_custom->photoUrl],
                 'initialPreviewAsData'  => true,
                 'showCaption'           => false,
                 'showRemove'            => false,

@@ -5,11 +5,11 @@ namespace app\controllers;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
-use app\models\LoginForm;
-use app\models\ContactForm;
 use yii\filters\VerbFilter;
+use yii\bootstrap4\ActiveForm;
 use yii\filters\AccessControl;
 use webvimark\modules\UserManagement\models\User;
+use webvimark\modules\UserManagement\models\forms\LoginForm;
 
 class SiteController extends Controller
 {
@@ -19,25 +19,22 @@ class SiteController extends Controller
     public function behaviors()
     {
         return [
-            // 'access' => [
-            //     'class' => AccessControl::className(),
-            //     'only' => ['logout'],
-            //     'rules' => [
-            //         [
-            //             'actions' => ['logout'],
-            //             'allow' => true,
-            //             'roles' => ['@'],
-            //         ],
-            //     ],
-            // ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['logout'],
+                'rules' => [
+                    [
+                        'actions' => ['logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'logout' => ['post'],
                 ],
-            ],
-            'ghost-access' => [
-                'class' => 'webvimark\modules\UserManagement\components\GhostAccessControl',
             ],
         ];
     }
@@ -64,6 +61,9 @@ class SiteController extends Controller
         if (User::hasRole('owner', false)) {
             return $this->render('owner/index');
         }
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/site/login']);
+        }
         // if (User::hasRole('restaurant_empleado', false)) {
         //     return $this->redirect(['/'])
         // }
@@ -75,33 +75,23 @@ class SiteController extends Controller
         }
     }
 
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
     public function actionLogin()
     {
-        // if (!Yii::$app->user->isGuest) {
-        //     return $this->goHome();
-        // }
-
-        // $model = new LoginForm();
-        // if ($model->load(Yii::$app->request->post()) && $model->login()) {
-        //     return $this->goBack();
-        // }
-
-        // $model->password = '';
-        // return $this->render('login', [
-        //     'model' => $model,
-        // ]);
+        $this->view->title = 'Login';
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $model = new LoginForm();
+        if (Yii::$app->request->isAjax and $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) and $model->login()) {
+            return $this->goBack();
+        }
+        return $this->render('login', compact('model'));
     }
 
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
     public function actionLogout()
     {
         Yii::$app->user->logout();

@@ -1,49 +1,51 @@
 <?php
 
-/** @var yii\web\View $this */
-/** @var yii\bootstrap4\ActiveForm $form */
-/** @var app\models\LoginForm $model */
-
 use yii\bootstrap4\ActiveForm;
-use yii\bootstrap4\Html;
 
-$this->title = 'Login';
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="site-login">
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>Please fill out the following fields to login:</p>
-
-    <?php $form = ActiveForm::begin([
-        'id' => 'login-form',
-        'layout' => 'horizontal',
-        'fieldConfig' => [
-            'template' => "{label}\n{input}\n{error}",
-            'labelOptions' => ['class' => 'col-lg-1 col-form-label mr-lg-3'],
-            'inputOptions' => ['class' => 'col-lg-3 form-control'],
-            'errorOptions' => ['class' => 'col-lg-7 invalid-feedback'],
-        ],
-    ]); ?>
-
-        <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
-
-        <?= $form->field($model, 'password')->passwordInput() ?>
-
-        <?= $form->field($model, 'rememberMe')->checkbox([
-            'template' => "<div class=\"offset-lg-1 col-lg-3 custom-control custom-checkbox\">{input} {label}</div>\n<div class=\"col-lg-8\">{error}</div>",
-        ]) ?>
-
-        <div class="form-group">
-            <div class="offset-lg-1 col-lg-11">
-                <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+<div class="container">
+    <div class="row justify-content-center align-items-center ">
+        <div class="mt-5  col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 text-center">
+            <div class="card card-user">
+                <?php $form = ActiveForm::begin([
+                    //'layout' => 'horizontal',
+                    'options' => ['autocomplete' => 'off'],
+                    'validateOnBlur' => false,
+                    'fieldConfig' => [
+                        'template' => "{input}\n{error}",
+                    ],
+                ]); ?>
+                <div class="card-body">
+                    <div class="author">
+                        <div class="block block-one"></div>
+                        <div class="block block-two"></div>
+                        <div class="block block-three"></div>
+                        <div class="block block-four"></div>
+                        <img class="avatar" src="/upload/images/default/user-default.png" alt="...">
+                        <h5 class="title h3">Inicia Sesión</h5>
+                    </div>
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <?= $form->field($model, 'username', ['options' => ['tag' => false,]])
+                            ->textInput(['placeholder' => 'Usuario', 'autocomplete' => 'off', 'class' => 'form-control form-control-lg']) ?>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <?= $form->field($model, 'password', ['options' => ['tag' => false,]])
+                            ->passwordInput(['placeholder' => 'Contraseña', 'autocomplete' => 'off', 'class' => 'form-control form-control-lg']) ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="card-footer">
+                        <button type="submit" style="margin-top: -20px" class="btn btn-fill btn-primary">Iniciar Sesion</button>
+                    </div>
+                    <p>O</p>
+                    <a class="" href="/user-owner/register">Registrate Como Dueño De Restarante</a>
+                    <p>O</p>
+                    <a class="" href="/client/register">Registrate Como Cliente</a>
+                </div>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
-
-    <?php ActiveForm::end(); ?>
-
-    <div class="offset-lg-1" style="color:#999;">
-        You may login with <strong>admin/admin</strong> or <strong>demo/demo</strong>.<br>
-        To modify the username/password, please check out the code <code>app\models\User::$users</code>.
     </div>
 </div>

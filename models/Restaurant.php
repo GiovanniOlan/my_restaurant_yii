@@ -96,7 +96,7 @@ class Restaurant extends \yii\db\ActiveRecord
 
     public function getTickets()
     {
-        return $this->hasMany(Ticket::className(), ['tic_fkrestaurant' => 'id']);
+        return $this->hasMany(Ticket::className(), ['tic_fkrestaurant' => 'id'])->orderBy(['created_date' => SORT_DESC]);
     }
 
     public function getLogoHtml($width = 30, $height = 30)

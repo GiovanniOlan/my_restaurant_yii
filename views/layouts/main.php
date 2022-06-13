@@ -75,12 +75,14 @@ AppAsset::register($this);
         </div>
     </div> -->
 
-    <footer class="footer mt-auto py-3 text-muted">
+    <!-- <footer class="footer mt-auto py-3 text-muted">
         <div class="container">
-            <p class="float-left">&copy; My Company <?= date('Y') ?></p>
-            <p class="float-right"><?= Yii::powered() ?></p>
+            <p class="float-left">&copy; My Company <?php // date('Y') 
+                                                    ?></p>
+            <p class="float-right"><?php // Yii::powered() 
+                                    ?></p>
         </div>
-    </footer>
+    </footer> -->
 
     <?php $this->endBody() ?>
 </body>
@@ -98,5 +100,3 @@ AppAsset::register($this);
 <body class="">
 
 </body>
-
-{% block scri

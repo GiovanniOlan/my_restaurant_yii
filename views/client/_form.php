@@ -18,13 +18,13 @@ use yii\bootstrap4\ActiveForm;
     <?php $form = ActiveForm::begin(['options' => ['class' => 'row card-body']]); ?>
 
 
-    <?= $form->field($user_custom, 'usu_nombre', ['options' => ['class' => 'col-3']])->textInput(['maxlength' => true]) ?>
+    <?= $form->field($user_custom, 'usu_nombre', ['options' => ['class' => 'col-4']])->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($user_custom, 'usu_paterno', ['options' => ['class' => 'col-3']])->textInput(['maxlength' => true]) ?>
+    <?= $form->field($user_custom, 'usu_paterno', ['options' => ['class' => 'col-4']])->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($user_custom, 'usu_materno', ['options' => ['class' => 'col-3']])->textInput(['maxlength' => true]) ?>
+    <?= $form->field($user_custom, 'usu_materno', ['options' => ['class' => 'col-4']])->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($user_custom, 'usu_datebirth', ['options' => ['class' => 'col-3']])->input('date') ?>
+    <?= $form->field($user_custom, 'usu_datebirth', ['options' => ['class' => 'col-4']])->input('date') ?>
     <?php /*$form->field($user_custom, 'usu_datebirth')->widget(DatePicker::className(), [
         'model' => $user_custom,
         'attribute' => 'datetime_2',
@@ -42,18 +42,15 @@ use yii\bootstrap4\ActiveForm;
         ],
     ]); ?>
     <?= $form->field($user, 'email', ['options' => ['class' => 'col-4']])->textInput(['maxlength' => 255]) ?>
-
-    <?= $form->field($client, 'cli_fkrestaurant', ['options' => ['class' => 'col-4']])->widget(Select2::classname(), [
-        'data' => ArrayHelper::map(Restaurant::find()->where(['state' => 1])->all(), 'id', 'res_name'),
-        'language' => 'es',
-        'options' => ['placeholder' => 'Seleccione un Grupo ...'],
-        'pluginOptions' => [
-            'allowClear' => true
-        ],
-    ]); ?>
-
-
     <div class="col-6">
+        <?= $form->field($client, 'cli_fkrestaurant')->widget(Select2::classname(), [
+            'data' => ArrayHelper::map(Restaurant::find()->where(['state' => 1])->all(), 'id', 'res_name'),
+            'language' => 'es',
+            'options' => ['placeholder' => 'Seleccione un Grupo ...'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ]); ?>
         <?= $form->field($user, 'username')->textInput(['maxlength' => 255, 'autocomplete' => 'off'])->label('Nombre De Usuario') ?>
         <?= $form->field($user, 'password')->passwordInput(['maxlength' => 255, 'autocomplete' => 'off']) ?>
         <?= $form->field($user, 'repeat_password')->passwordInput(['maxlength' => 255, 'autocomplete' => 'off']) ?>
@@ -76,7 +73,7 @@ use yii\bootstrap4\ActiveForm;
                 'showRemove'            => false,
                 'showUpload'            => false,
                 'showCancel'            => false,
-                'browseClass'           => 'btn btn-primary btn-block',
+                'browseClass'           => 'btn btn-secondary btn-block',
                 'browseIcon'            => '<i class="fas fa-camera"></i> ',
                 'browseLabel'           =>  'Seleccione una foto',
             ],
@@ -90,7 +87,7 @@ use yii\bootstrap4\ActiveForm;
 
     <div class="col-12">
         <div class="text-center">
-            <?= Html::submitButton('Guardar', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('Registrarse', ['class' => 'btn btn-success']) ?>
         </div>
     </div>
 

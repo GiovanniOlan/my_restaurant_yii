@@ -142,7 +142,7 @@ class TicketController extends Controller
 
                     $ticket_item->save();
                 }
-                Yii::$app->session->setFlash('success', "Muchas gracias por tú compra, se ha hecho un cargo a tu tarjeta de {$items_cart_total['total']}");
+                Yii::$app->session->setFlash('success', "Muchas gracias por tú compra, se ha hecho un cargo a tu tarjeta de $ {$items_cart_total['total']}");
                 return $this->redirect(['/']);
             }
         }

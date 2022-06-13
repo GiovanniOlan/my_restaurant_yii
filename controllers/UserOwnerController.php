@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use yii\web\Controller;
 use app\models\UserOwner;
+use app\models\Utilities;
 use app\models\UserCustom;
 use yii\filters\VerbFilter;
 use app\models\UserOwnerSearch;
@@ -110,7 +111,14 @@ class UserOwnerController extends Controller
                 if ($user->save()) {
                     User::assignRole($user->id, "owner");
                     $user_custom->usu_fkuser = $user->id;
-
+                    if (!empty($img)) {
+                        $response = Utilities::uploadImage('/upload/images/user-custom/', $img);
+                        if (!empty($response)) {
+                            $user_custom->usu_photo = $response;
+                        } else {
+                            Yii::$app->session->setFlash('Te has registrado, pero no se subio la imagen, pruebe editando tu informacion.');
+                        }
+                    }
                     if ($user_custom->save()) {
                         $user_owner->usu_fkusercustom = $user_custom->id;
                         $user_owner->state = 1;

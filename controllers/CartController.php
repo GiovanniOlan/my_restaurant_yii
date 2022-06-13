@@ -117,13 +117,6 @@ class CartController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing Cart model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -131,13 +124,6 @@ class CartController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Cart model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Cart the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     protected function findModel($id)
     {
         if (($model = Cart::findOne(['id' => $id])) !== null) {

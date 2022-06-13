@@ -1,13 +1,5 @@
 <?php
 
-use app\models\Utilities;
-use app\models\Restaurant;
-
-
-$id_restaurant = Yii::$app->getRequest()->getCookies()->getValue('id_restaurant');
-
-$restaurant = Restaurant::find()->where(['id' => $id_restaurant])->one();
-
 
 ?>
 

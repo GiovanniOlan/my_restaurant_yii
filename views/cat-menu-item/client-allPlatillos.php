@@ -6,7 +6,7 @@ $this->title = "Platillos ({$restaurant->res_name})"
 
 ?>
 
-<?= $this->render('/layouts/sidebar-left-client') ?>
+<?= $this->render('/layouts/sidebar-left-client', compact('restaurant')) ?>
 
 <div class="main-panel">
 

@@ -6,7 +6,7 @@ $this->title = "Tus Pedidos";
 
 ?>
 
-<?= $this->render('/layouts/sidebar-left-client') ?>
+<?= $this->render('/layouts/sidebar-left-client', compact('restaurant')) ?>
 
 <div class="main-panel">
 
@@ -22,7 +22,8 @@ $this->title = "Tus Pedidos";
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title h2"><?= "(Fecha: {$tic->created_date}) - (Cliente: {$tic->tic_clientname}) - (Total:{$tic->tic_total})" ?></h4>
+                                <h4 class="card-title h2"><?= "(Fecha: {$tic->created_date}) - 
+                                (Total: $ {$tic->tic_total}) - (Estado: {$tic->stringState})" ?></h4>
                             </div>
                             <div class="card-body row">
                                 <?php foreach ($tic->ticketItems as $items) : ?>
@@ -35,11 +36,8 @@ $this->title = "Tus Pedidos";
                                                     <div class="block block-two"></div>
                                                     <div class="block block-three"></div>
                                                     <div class="block block-four"></div>
-                                                    <a href="#">
-                                                        <img class="avatar" src="<?= $items->ticiteFkcatmenuitem->imageUrl ?>" alt="">
-                                                        <h5 class="title h3"><?= $items->ticite_itemname ?></h5>
-                                                    </a>
-                                                    <!-- <p class="description">a</p> -->
+                                                    <img class="avatar" src="<?= $items->ticiteFkcatmenuitem->imageUrl ?>" alt="">
+                                                    <h5 class="title h3"><?= $items->ticite_itemname ?></h5>
                                                     <p class="card-description">Catidad: <?= $items->ticite_quantity ?> </p>
                                                     <p class="card-description" style="color: red"><?= $items->ticite_subtotal ?></p>
                                                 </div>

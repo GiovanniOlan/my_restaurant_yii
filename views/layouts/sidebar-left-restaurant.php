@@ -47,9 +47,9 @@ $restaurant = Restaurant::find()->where(['id' => $id_restaurant])->one();
                 </a>
             </li>
             <li>
-                <a href="">
+                <a href="/restaurant/reportes">
                     <i class="tim-icons icon-single-02"></i>
-                    <p>Pedidos</p>
+                    <p>Reportes</p>
                 </a>
             </li>
 

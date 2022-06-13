@@ -17,7 +17,7 @@ $this->title = "Agregar Empleado "
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Mis Restaurantes</a></li>
                 <li class="breadcrumb-item"><a href="/restaurant/view/<?= $restaurant->id ?>"><?= $restaurant->res_name ?></a></li>
-                <li class="breadcrumb-item"><a href="/cat-menu-item/platillos">Platillos</a></li>
+                <li class="breadcrumb-item"><a href="/empleado/todos">Empleados</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Agregar</li>
             </ol>
         </nav>

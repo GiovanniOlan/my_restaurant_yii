@@ -43,18 +43,6 @@ use webvimark\modules\UserManagement\UserManagementModule;
                     </ul>
                 </li>
             <?php endif ?>
-            <li>
-                <a href="">
-                    <i class="tim-icons icon-atom"></i>
-                    <p>Cuentas</p>
-                </a>
-            </li>
-            <li>
-                <a href="">
-                    <i class="tim-icons icon-single-02"></i>
-                    <p>Clientes</p>
-                </a>
-            </li>
 
         </ul>
     </div>
